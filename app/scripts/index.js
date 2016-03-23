@@ -11,6 +11,7 @@ $.fn.serializeObject = function() {
 $(function(){
   var ref = new Firebase("https://fiery-fire-1039.firebaseio.com/");
   var auth;
+  var formData;
 
   $('#signup').on('submit', function(event){
     event.preventDefault();
@@ -39,7 +40,8 @@ $(function(){
   $('#login').on('submit', function(event){
     event.preventDefault();
     var $form = $(this);
-    var formData = $form.serializeObject();
+    formData = $form.serializeObject();
+    console.log(formData.email);
 
     ref.authWithPassword(formData, function(error, authData) {
       if (error) {
@@ -51,21 +53,28 @@ $(function(){
     });
 
   });
-  $('#messageInput').keypress(function (e) {
+  $('#messageInput').on ( "submit", function (e) {
+            e.preventDefault();
+            var name = formData.email;
+            var text = $('#textmessages').val();
+            ref.push({name: name, text: text});
+            $('#messageInput').val('');
           if (e.keyCode == 13) {
-            var name = $('#nameInput').val();
-            var text = $('#messageInput').val();
-            myDataRef.push({name: name, text: text});
+            e.preventDefault();
+            var name = formData.email;
+            var text = $('#textmessages').val();
+            ref.push({name: name, text: text});
             $('#messageInput').val('');
           }
         });
-        myDataRef.on('child_added', function(snapshot) {
+         ref.on('child_added', function(snapshot) {
           var message = snapshot.val();
           displayChatMessage(message.name, message.text);
         });
         function displayChatMessage(name, text) {
           $('<div/>').text(text).prepend($('<em/>').text(name+': ')).appendTo($('#messagesDiv'));
           $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+          $('#textmessages').val('').empty();
         };
 
 
